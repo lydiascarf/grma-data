@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Global Risk Modelling Alliance Data Portal</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 40px;
+      background-color: #214738;
+      color: white;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .container {
+      padding: 40px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .intro {
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    h2 {
+      color: #214738;
+    }
+
+    .dataset {
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 6px solid #57b287;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .dataset h3 {
+      margin-top: 0;
+      color: #214738;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .download-btn {
+      display: inline-block;
+      padding: 10px 16px;
+      background-color: #57b287;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #eb702b;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #searchBox,
+    #typeFilter {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="logo.png" alt="GRMA Logo" />
+    <h1>Global Risk Modelling Alliance Data Portal</h1>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <p>
+        Datasets from GRMA country programmes are available here. This site
+        acts as a data back-up where data has been uploaded to a country-owned
+        geospatial data portal, or as the primary data hosting where a
+        country-owned portal is not available. For more information about GRMA
+        projects and country data portals, see
+        <a href="https://grma.global/project-data/" target="_blank">here</a>
+      </p>
+
+      <p>
+        Project reports are available
+        <a href="https://grma.global/resource-centre/country-reports/" target="_blank">here</a>
+      </p>
+
+      <p>
+        Browse and download below. Each card represents a dataset, zipped for
+        access. Metadata is provided for each dataset and follows the
+        <a href="https://riskdatalibrary.org" target="_blank">Risk Data Library Standard</a>
+      </p>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="searchBox" placeholder="Search datasets..." onkeyup="filterDatasets()">
+
+      <select id="typeFilter" onchange="filterDatasets()">
+        <option value="">All Types</option>
+        <option value="Hazard">Hazard</option>
+        <option value="Exposure">Exposure</option>
+        <option value="Vulnerability">Vulnerability</option>
+        <option value="Risk">Risk</option>
+      </select>
+    </div>
+
+    <div id="metadata-container"></div>
+  </div>
+
+  <script>
+    const COUNTRIES = {
+      CRI: "Costa Rica",
+      MDG: "Madagascar",
+    };
+    function loadMetadata() {
+      const s3Url =
+        "https://grma-data.s3.eu-west-2.amazonaws.com/metadata.json";
+      fetch(s3Url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Metadata loaded:", data);
+          const container = document.getElementById("metadata-container");
+          container.innerHTML = "";
+
+          data.objects.forEach((item) => {
+            const html = `
+                <div class="dataset">
+                  <h3>${item.title}</h3>
+                  <div class="meta">
+                    Countries: ${item.countries.map((c) => COUNTRIES[c]).join(", ")}<br />
+                    Type: ${item.risk_data_type.map((rdt) => rdt.charAt(0).toUpperCase() + rdt.slice(1)).join(", ")}<br />
+                    Format: ${item.resources
+                .map((res) => res.format)
+                .filter(
+                  (value, index, array) => array.indexOf(value) === index,
+                )
+                .join(", ")}<br />
+                  </div>
+                  <a class="download-btn" href="${item.download_url}" target="_blank">Download dataset</a>
+                </div>
+              `;
+            container.innerHTML += html;
+          });
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+
+    loadMetadata();
+
+    function filterDatasets() {
+      const search = document.getElementById("searchBox").value.toLowerCase();
+      const typeFilter = document
+        .getElementById("typeFilter")
+        .value.toLowerCase();
+
+      const datasets = document.querySelectorAll(".dataset");
+
+      datasets.forEach((ds) => {
+        const text = ds.innerText.toLowerCase();
+
+        const matchesSearch = text.includes(search);
+        const matchesType = typeFilter === "" || text.includes(typeFilter);
+
+        if (matchesSearch && matchesType) {
+          ds.style.display = "block";
+        } else {
+          ds.style.display = "none";
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

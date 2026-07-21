@@ -12,7 +12,6 @@ def read_metadata_files(bucket_name: str, metadata_prefix: str = "metadata/") ->
     metadata_objects = []
     
     try:
-        # List all objects in the metadata directory
         paginator = s3_client.get_paginator('list_objects_v2')
         pages = paginator.paginate(Bucket=bucket_name, Prefix=metadata_prefix)
         
@@ -23,7 +22,6 @@ def read_metadata_files(bucket_name: str, metadata_prefix: str = "metadata/") ->
             for obj in page['Contents']:
                 key = obj['Key']
                 
-                # Skip the prefix itself and only process .json files
                 if key == metadata_prefix or not key.endswith('.json'):
                     continue
                 
@@ -91,7 +89,6 @@ def create_metadata_index(bucket_name: str, metadata_list: List[Dict[str, Any]])
 
 def main() -> None:
     """Main function to orchestrate metadata file processing."""
-    # Read from .env file
     bucket_name = os.getenv('BUCKET_NAME')
     
     if not bucket_name:
@@ -100,7 +97,6 @@ def main() -> None:
     
     print(f"Starting metadata index generation for bucket: {bucket_name}\n")
     
-    # Read all metadata files
     metadata_objects = read_metadata_files(bucket_name)
     
     if metadata_objects:
