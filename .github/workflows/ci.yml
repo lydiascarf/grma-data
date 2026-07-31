@@ -1,0 +1,51 @@
+name: Update Metadata Index from S3
+
+on:
+  schedule:
+    # every day @ midnight utc
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-metadata:
+    environment: Update Metadata Index from S3
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+          cache-dependency-path: python/requirements.txt
+      
+      - name: Install dependencies
+        run: pip install -r python/requirements.txt
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+      
+      - name: Create .env file
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> python/.env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> python/.env
+          echo "BUCKET_NAME=grma-data" >> python/.env
+      
+      - name: Run metadata script
+        id: metadata
+        run: python python/import.py 2>&1 | tee metadata_log.txt
+
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: metadata-logs-${{ github.run_id }}
+          path: metadata_log.txt
+          retention-days: 30
