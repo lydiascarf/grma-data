@@ -2,8 +2,8 @@ name: Update Metadata Index from S3
 
 on:
   schedule:
-    # every day @ midnight utc
-    - cron: '0 0 * * *'
+    # every monday @ midnight utc
+    - cron: '0 0 * * 1'
   workflow_dispatch:
 
 jobs:

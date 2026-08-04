@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Global Risk Modelling Alliance Data Portal</title>
@@ -144,6 +145,14 @@
       CRI: "Costa Rica",
       MDG: "Madagascar",
     };
+    const LICENSES = {
+      "https://creativecommons.org/licenses/by/4.0/": "CC BY 4.0",
+      "https://creativecommons.org/licenses/by-sa/4.0/": "CC BY-SA 4.0",
+      "https://creativecommons.org/licenses/by-nc/4.0/": "CC BY-NC 4.0",
+      "https://creativecommons.org/licenses/by-nd/4.0/": "CC BY-ND 4.0",
+      "https://creativecommons.org/licenses/by-nc-sa/4.0/": "CC BY-NC-SA 4.0",
+      "https://creativecommons.org/licenses/by-nc-nd/4.0/": "CC BY-NC-ND 4.0",
+    }
     function loadMetadata() {
       const s3Url =
         "https://grma-data.s3.eu-west-2.amazonaws.com/metadata.json";
@@ -167,6 +176,8 @@
                   (value, index, array) => array.indexOf(value) === index,
                 )
                 .join(", ")}<br />
+                  License: ${item.license ? `<a href="${item.license}">${LICENSES[item.license] ?? 'Link'}</a>` : "Not specified" }<br />
+                  Description: ${item.description}<br />
                   </div>
                   <a class="download-btn" href="${item.download_url}" target="_blank">Download dataset</a>
                 </div>
