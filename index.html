@@ -127,7 +127,7 @@
     </div>
 
     <div class="controls">
-      <input type="text" id="searchBox" placeholder="Search project, creator, license, description, or title..." onkeyup="filterDatasets()">
+      <input type="text" id="searchBox" placeholder="Search project, creator, license, description, details, or title..." onkeyup="filterDatasets()">
 
       <select id="projectFilter" onchange="filterDatasets()">
         <option value="">All Projects</option>
@@ -217,6 +217,7 @@
                 .join(", ")}<br />
                   License: ${item.license ? `<a href="${item.license}">${LICENSES[item.license] ?? 'Link'}</a>` : "Not specified" }<br />
                   Description: ${item.description || "Not specified"}<br />
+                  ${item.details ? "Details: " + item.details + "<br />" : ""}
                   </div>
                   <a class="download-btn" href="${item.download_url}" target="_blank">Download dataset</a>
                   ${item.metadata_url ? `<a class="download-btn" href="${item.metadata_url}" target="_blank">Download metadata</a>` : ""}
