@@ -83,11 +83,12 @@
     .controls {
       margin-bottom: 20px;
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
     }
 
-    #searchBox,
-    #typeFilter {
+    .controls input,
+    .controls select {
       padding: 10px;
       font-size: 14px;
       border-radius: 5px;
@@ -126,14 +127,22 @@
     </div>
 
     <div class="controls">
-      <input type="text" id="searchBox" placeholder="Search datasets..." onkeyup="filterDatasets()">
+      <input type="text" id="searchBox" placeholder="Search project, creator, license, description, or title..." onkeyup="filterDatasets()">
+
+      <select id="projectFilter" onchange="filterDatasets()">
+        <option value="">All Projects</option>
+      </select>
 
       <select id="typeFilter" onchange="filterDatasets()">
-        <option value="">All Types</option>
-        <option value="Hazard">Hazard</option>
-        <option value="Exposure">Exposure</option>
-        <option value="Vulnerability">Vulnerability</option>
-        <option value="Risk">Risk</option>
+        <option value="">All Risk Data Types</option>
+      </select>
+
+      <select id="licenseFilter" onchange="filterDatasets()">
+        <option value="">All Licenses</option>
+      </select>
+
+      <select id="spatialScaleFilter" onchange="filterDatasets()">
+        <option value="">All Spatial Scales</option>
       </select>
     </div>
 
@@ -153,36 +162,77 @@
       "https://creativecommons.org/licenses/by-nc-sa/4.0/": "CC BY-NC-SA 4.0",
       "https://creativecommons.org/licenses/by-nc-nd/4.0/": "CC BY-NC-ND 4.0",
     }
+    function asValues(value) {
+      if (Array.isArray(value)) {
+        return value.map(String).filter(Boolean);
+      }
+      return value ? [String(value)] : [];
+    }
+
+    function populateFilter(id, values, getLabel = (value) => value) {
+      const select = document.getElementById(id);
+      const uniqueValues = [...new Set(values)].sort((a, b) =>
+        a.localeCompare(b),
+      );
+
+      uniqueValues.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = getLabel(value);
+        select.appendChild(option);
+      });
+    }
+
     function loadMetadata() {
       const s3Url =
         "https://grma-data.s3.eu-west-2.amazonaws.com/metadata.json";
-      fetch(s3Url)
+      fetch(s3Url, { cache: "no-store" })
         .then((response) => response.json())
         .then((data) => {
           console.log("Metadata loaded:", data);
           const container = document.getElementById("metadata-container");
           container.innerHTML = "";
+          const items = data.objects || [];
 
-          data.objects.forEach((item) => {
+          populateFilter("projectFilter", items.flatMap((item) => asValues(item.project_name)));
+          populateFilter("typeFilter", items.flatMap((item) => asValues(item.risk_data_type)));
+          populateFilter(
+            "licenseFilter",
+            items.flatMap((item) => asValues(item.license)),
+            (license) => LICENSES[license] ?? license,
+          );
+          populateFilter("spatialScaleFilter", items.flatMap((item) => asValues(item.spatial_scale)));
+
+          items.forEach((item) => {
+            const riskDataTypes = asValues(item.risk_data_type);
             const html = `
                 <div class="dataset">
                   <h3>${item.title}</h3>
                   <div class="meta">
-                    Countries: ${item.countries.map((c) => COUNTRIES[c]).join(", ")}<br />
-                    Type: ${item.risk_data_type.map((rdt) => rdt.charAt(0).toUpperCase() + rdt.slice(1)).join(", ")}<br />
-                    Format: ${item.resources
+                    Project: ${item.project_name || "Not specified"}<br />
+                    Creator: ${item.creator_name || "Not specified"}<br />
+                    Countries: ${(item.countries || []).map((c) => COUNTRIES[c] || c).join(", ")}<br />
+                    Type: ${riskDataTypes.map((rdt) => rdt.charAt(0).toUpperCase() + rdt.slice(1)).join(", ")}<br />
+                    Spatial scale: ${item.spatial_scale || "Not specified"}<br />
+                    Format: ${(item.resources || [])
                 .map((res) => res.format)
                 .filter(
                   (value, index, array) => array.indexOf(value) === index,
                 )
                 .join(", ")}<br />
                   License: ${item.license ? `<a href="${item.license}">${LICENSES[item.license] ?? 'Link'}</a>` : "Not specified" }<br />
-                  Description: ${item.description}<br />
+                  Description: ${item.description || "Not specified"}<br />
                   </div>
                   <a class="download-btn" href="${item.download_url}" target="_blank">Download dataset</a>
+                  ${item.metadata_url ? `<a class="download-btn" href="${item.metadata_url}" target="_blank">Download metadata</a>` : ""}
                 </div>
               `;
-            container.innerHTML += html;
+            container.insertAdjacentHTML("beforeend", html);
+            const card = container.lastElementChild;
+            card.dataset.project = item.project_name || "";
+            card.dataset.riskDataTypes = JSON.stringify(riskDataTypes);
+            card.dataset.license = item.license || "";
+            card.dataset.spatialScale = item.spatial_scale || "";
           });
         })
         .catch((error) => console.error("Error:", error));
@@ -192,23 +242,24 @@
 
     function filterDatasets() {
       const search = document.getElementById("searchBox").value.toLowerCase();
-      const typeFilter = document
-        .getElementById("typeFilter")
-        .value.toLowerCase();
+      const projectFilter = document.getElementById("projectFilter").value;
+      const typeFilter = document.getElementById("typeFilter").value;
+      const licenseFilter = document.getElementById("licenseFilter").value;
+      const spatialScaleFilter = document.getElementById("spatialScaleFilter").value;
 
       const datasets = document.querySelectorAll(".dataset");
 
       datasets.forEach((ds) => {
         const text = ds.innerText.toLowerCase();
-
         const matchesSearch = text.includes(search);
-        const matchesType = typeFilter === "" || text.includes(typeFilter);
+        const matchesProject = !projectFilter || ds.dataset.project === projectFilter;
+        const matchesType = !typeFilter || JSON.parse(ds.dataset.riskDataTypes).includes(typeFilter);
+        const matchesLicense = !licenseFilter || ds.dataset.license === licenseFilter;
+        const matchesSpatialScale = !spatialScaleFilter || ds.dataset.spatialScale === spatialScaleFilter;
 
-        if (matchesSearch && matchesType) {
-          ds.style.display = "block";
-        } else {
-          ds.style.display = "none";
-        }
+        ds.style.display = matchesSearch && matchesProject && matchesType && matchesLicense && matchesSpatialScale
+          ? "block"
+          : "none";
       });
     }
   </script>

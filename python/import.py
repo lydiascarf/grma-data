@@ -48,19 +48,50 @@ def read_metadata_files(bucket_name: str, metadata_prefix: str = "metadata/") ->
         return []
 
 
+def _name_value(value: Any) -> str:
+    """Convert a name, named object, or list of names into searchable text."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        name = value.get("name") or value.get("title") or value.get("organization")
+        return _name_value(name) if name else ""
+    if isinstance(value, list):
+        return ", ".join(filter(None, (_name_value(item) for item in value)))
+    return ""
+
+
 def extract_properties(metadata: Dict[str, Any], key) -> Dict[str, Any]:
     """Extract specific properties from a metadata JSON file."""
+    project = metadata.get("project_name") or metadata.get("project")
+    creator = (
+        metadata.get("creator_name")
+        or metadata.get("creator")
+        or metadata.get("creators")
+    )
+    spatial = metadata.get("spatial") or {}
+    spatial_scale = (
+        metadata.get("spatial_scale")
+        or spatial.get("scale")
+        or spatial.get("spatial_scale")
+        or spatial.get("spatial_resolution")
+        or spatial.get("resolution")
+    )
+    dataset_key = key.removeprefix("metadata/rdls_").removesuffix(".json")
     entry = {
-        "download_url": f"https://grma-data.s3.eu-west-2.amazonaws.com/datasets/{key.removeprefix("metadata/rdls_").removesuffix('.json')}.zip",
+        "download_url": f"https://grma-data.s3.eu-west-2.amazonaws.com/datasets/{dataset_key}.zip",
+        "metadata_url": f"https://grma-data.s3.eu-west-2.amazonaws.com/{key}",
         "id": metadata["id"],
         "title": metadata["title"],
+        "project_name": _name_value(project),
+        "creator_name": _name_value(creator),
         "risk_data_type": metadata["risk_data_type"],
         "description": metadata.get("description"),
         "license": metadata.get("license"),
-        "countries": metadata.get("spatial",{}).get("countries",[]),
-        "resources": metadata.get('resources',[])
+        "countries": spatial.get("countries", []),
+        "spatial_scale": _name_value(spatial_scale),
+        "resources": metadata.get("resources", [])
     }
-    
+
     return {k: v for k, v in entry.items()}
 
 
