@@ -87,7 +87,6 @@ def extract_properties(metadata: Dict[str, Any], key) -> Dict[str, Any]:
         "risk_data_type": metadata["risk_data_type"],
         "description": metadata.get("description"),
         "license": metadata.get("license"),
-        "countries": spatial.get("countries", []),
         "spatial_scale": _name_value(spatial_scale),
         "resources": metadata.get("resources", [])
     }

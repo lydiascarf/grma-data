@@ -150,10 +150,6 @@
   </div>
 
   <script>
-    const COUNTRIES = {
-      CRI: "Costa Rica",
-      MDG: "Madagascar",
-    };
     const LICENSES = {
       "https://creativecommons.org/licenses/by/4.0/": "CC BY 4.0",
       "https://creativecommons.org/licenses/by-sa/4.0/": "CC BY-SA 4.0",
@@ -211,7 +207,6 @@
                   <div class="meta">
                     Project: ${item.project_name || "Not specified"}<br />
                     Creator: ${item.creator_name || "Not specified"}<br />
-                    Countries: ${(item.countries || []).map((c) => COUNTRIES[c] || c).join(", ")}<br />
                     Type: ${riskDataTypes.map((rdt) => rdt.charAt(0).toUpperCase() + rdt.slice(1)).join(", ")}<br />
                     Spatial scale: ${item.spatial_scale || "Not specified"}<br />
                     Format: ${(item.resources || [])

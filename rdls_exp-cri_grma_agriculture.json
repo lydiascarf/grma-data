@@ -1,0 +1,120 @@
+{
+  "datasets": [
+    {
+      "id": "rdls_exp-cri_grma_agriculture",
+      "title": "GRMA CR-Agriculture Exposure Model",
+      "description": "Agriculture exposure model for Costa Rica. Includes exposure data for Coffee, Sugarcane and Cattle",
+      "risk_data_type": [
+        "exposure"
+      ],
+      "publisher": {
+        "name": "INGENIAR-CIMNE",
+        "email": "gabernal@ingeniar-risk.com",
+        "url": "https://ingeniar-risk.com/"
+      },
+      "version": "1.0",
+      "purpose": "This dataset was created for multihazard risk assessment as part of the implementation of the GRMA program in Costa Rica",
+      "project": {
+        "name": "GRMA Costa Rica",
+	"url": "https://grma.global/project-data/"
+      },
+      "details": "Agricultural exposure model for Costa Rica. It includes exposure data for coffee, sugarcane, and cattle. The locations correspond to the centroids of productive properties, which were used as the modelling land units. The model was developed from the most recent land-cover distribution, assigning production randomly to land units in order to match regional production totals.",
+      "contact_point": {
+        "name": "Gabriel Bernal",
+        "email": "gabernal@ingeniar-risk.com"
+      },
+      "creator": {
+        "name": "INGENIAR-CIMNE",
+        "email": "gabernal@ingeniar-risk.com",
+        "url": "https://ingeniar-risk.com/"
+      },
+      "spatial": {
+        "countries": [
+          "CRI"
+        ],
+        "bbox": [
+          -86,
+          8,
+          -82,
+          12
+        ],
+        "scale": "national"
+      },
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "resources": [
+        {
+          "id": "Coffee_1",
+          "title": "Coffee production sites",
+          "description": "Location, production, and valuation assigned to the centroids of coffee-producing land units.",
+          "format": "Shapefile",
+          "coordinate_system": "EPSG:4326",
+          "media_type": "application/vnd.shp",
+          "access_url": "https://example.org/grma-cri/access-pending",
+          "download_url": "https://example.org/grma-cri/access-pending"
+        },
+        {
+          "id": "Coffee_2",
+          "title": "Coffee production sites",
+          "description": "Location, production, and valuation assigned to the centroids of coffee-producing land units.",
+          "format": "Shapefile",
+          "coordinate_system": "EPSG:8908",
+          "media_type": "application/vnd.shp",
+          "access_url": "https://example.org/grma-cri/access-pending",
+          "download_url": "https://example.org/grma-cri/access-pending"
+        },
+        {
+          "id": "Sugarcane_1",
+          "title": "Sugarcane production sites",
+          "description": "Location, production, and valuation assigned to the centroids of sugarcane-producing land units.",
+          "format": "Shapefile",
+          "coordinate_system": "EPSG:4326",
+          "media_type": "application/vnd.shp",
+          "access_url": "https://example.org/grma-cri/access-pending",
+          "download_url": "https://example.org/grma-cri/access-pending"
+        },
+        {
+          "id": "Cattle_1",
+          "title": "Cattle sites",
+          "description": "Location, production, and valuation assigned to the centroids of cattle production land units for both meat and milk.",
+          "format": "Shapefile",
+          "coordinate_system": "EPSG:4326",
+          "media_type": "application/vnd.shp",
+          "access_url": "https://example.org/grma-cri/access-pending",
+          "download_url": "https://example.org/grma-cri/access-pending"
+        },
+        {
+          "id": "Cattle_2",
+          "title": "Cattle sites",
+          "description": "Location, production, and valuation assigned to the centroids of cattle production land units for both meat and milk.",
+          "format": "Shapefile",
+          "coordinate_system": "EPSG:8908",
+          "media_type": "application/vnd.shp",
+          "access_url": "https://example.org/grma-cri/access-pending",
+          "download_url": "https://example.org/grma-cri/access-pending"
+        }
+      ],
+      "exposure": [
+        {
+          "id": "exposure_1",
+          "category": "agriculture",
+          "metrics": [
+            {
+              "id": "VALFIS",
+              "dimension": "product",
+              "measurement": {
+                "quantity_kind": "currency",
+                "unit": "CRC"
+              }
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "href": "https://docs.riskdatalibrary.org/en/1__0__0/rdls_schema.json",
+          "rel": "describedby"
+        }
+      ]
+    }
+  ]
+}
